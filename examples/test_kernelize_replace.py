@@ -47,7 +47,7 @@ def _install_kernel_stubs():
 
 def _load_function_kernel():
     _install_kernel_stubs()
-    path = ROOT / "twinkle" / "kernel" / "function.py"
+    path = ROOT / "kernels" / "src" / "kernels" / "function.py"
     spec = importlib.util.spec_from_file_location(
         "function_kernel_under_test",
         path,
