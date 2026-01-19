@@ -1,3 +1,6 @@
+import importlib.util
+from pathlib import Path
+
 import torch
 import torch.nn.functional as F
 
@@ -19,7 +22,7 @@ def main() -> None:
         print("Kernel not available for this environment, skipping.")
         return
 
-    module_name = "examples.activation_target_module"
+    module_name = "activation_target_module"
 
     register_function_kernel(
         func_name="silu_and_mul",
@@ -34,7 +37,11 @@ def main() -> None:
     x = torch.randn(128, 1024, device=device, dtype=dtype)
     out = torch.empty(128, 512, device=device, dtype=dtype)
 
-    from examples import activation_target_module as target_module
+    module_path = Path(__file__).resolve().parent / "activation_target_module.py"
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    assert spec is not None and spec.loader is not None
+    target_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(target_module)
 
     y_kernel = target_module.silu_and_mul(out, x)
     y_ref = reference_silu_and_mul(torch.empty_like(out), x)
